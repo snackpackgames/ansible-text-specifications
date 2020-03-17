@@ -1,0 +1,29 @@
+[*] --> Scene : Game Start
+Scene --> [*] :  Game End
+
+state Player {
+   state Actions {
+
+   }
+
+   Actions --> NPC1 : Talk
+}
+
+state Scene {
+  state Transition {
+
+  }
+  
+  state "Demo NPC" as NPC1 {
+
+  }
+
+  Transition --> Scene2 : To Next Scene
+}
+
+state "Another Scene" as Scene2 {
+  state "Point of Interest" as PointOfInterest3 {
+
+  }
+}
+
