@@ -1,29 +1,43 @@
-[*] --> Scene : Game Start
-Scene --> [*] :  Game End
-
 state Player {
+   
    state Actions {
-
+      state Talk
+      state Attack
+      state Walk
    }
 
-   Actions --> NPC1 : Talk
+   Talk --> NPC1
+   Attack --> Enemy1
+   Walk --> Transition
 }
 
 state Scene {
-  state Transition {
+  state "Points of Interest" as PointsOfInterest {
+    
+    state Transition {
+    }
+    
+    state "Bob the NPC" as NPC1 {
+    }
+    
+    state "Alice the Enemy" as Enemy1 {
+    }
 
+    Transition --> Scene2 : To Next Scene
+    NPC1 --> DialogSystem
+    Enemy1 --> BattleSystem
   }
-  
-  state "Demo NPC" as NPC1 {
 
-  }
-
-  Transition --> Scene2 : To Next Scene
 }
 
 state "Another Scene" as Scene2 {
-  state "Point of Interest" as PointOfInterest3 {
-
-  }
+  state "Point of Interest" as PointOfInterest3
 }
 
+state "Battle System" as BattleSystem {
+}
+
+state "Dialogue System" as DialogSystem {
+}
+
+BattleSystem : This is detailed in the Battle System UML Diagram.
