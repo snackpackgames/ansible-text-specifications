@@ -1,0 +1,8 @@
+Consumables : Single use
+
+[*] -> InvMenu : Enter inventory
+InvMenu --> Consumables
+Consumables --> InvMenu
+InvMenu --> PermanentItems
+PermanentItems --> InvMenu
+InvMenu -> [*] : Exit inventory
