@@ -1,0 +1,13 @@
+Upkeep: Resolve beginning-of-turn effects
+End: Resolve end-of-turn effects
+End: Check enemy health. If all == 0, end battle
+Upkeep --> Action
+Action: Player is presented with possible actions
+Action: Selected action may require a target
+state Action { 
+ SelectAction -> PickTarget: Action req's target
+ SelectAction --> Validation
+ PickTarget --> Validation
+ Validation --> Execution
+ Execution --> End
+}
