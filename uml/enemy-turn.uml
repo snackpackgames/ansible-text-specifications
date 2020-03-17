@@ -1,0 +1,18 @@
+Upkeep: Resolve beginning-of-turn effects
+End: Resolve end-of-turn effects
+End: Check player health. If == 0, go to game over
+
+EnemyActions: Each enemy has a list of available actions
+EnemyActions: Each enemy chooses one action each turn
+
+state EnemyActions {
+Upkeep ---> Enemy1
+ExecAction -> CheckPlyrHP: 1, 2,..., N
+
+Enemy1 --> ExecAction: 1a
+Enemy2 --> ExecAction: 2a
+CheckPlyrHP --> Enemy2: 1b
+CheckPlyrHP --> EnemyN: 2b
+CheckPlyrHP ---> End: Nb -- If player HP == 0, go immediately to End
+EnemyN --> ExecAction : Na
+}
