@@ -1,0 +1,18 @@
+[*] -> DialogStart: Transition to dialog
+DialogStart: Set dialog to initial state
+DialogStart -down-> DisplayCurrentDialogState
+state DisplayCurrentDialogState {
+GetStoryText -> GetOptions
+GetOptions -> DisplayToPlayer
+DisplayToPlayer:
+}
+
+PlayerOptionChoice:
+DialogEnd:
+GetNextDialogState:
+
+DisplayCurrentDialogState -down-> PlayerOptionChoice
+PlayerOptionChoice -down-> DialogEnd
+PlayerOptionChoice -right-> GetNextDialogState
+GetNextDialogState -up-> DisplayCurrentDialogState
+DialogEnd -right-> [*]: Transition back to Scene
