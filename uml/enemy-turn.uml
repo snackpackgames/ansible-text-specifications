@@ -1,3 +1,4 @@
+@startuml
 Upkeep: Resolve beginning-of-turn effects
 End: Resolve end-of-turn effects
 End: Check player health. If == 0, go to game over
@@ -17,3 +18,4 @@ CheckPlyrHP ---> End: Nb
 CheckPlyrHP ---> End: Player HP == 0
 EnemyN --> ExecAction : Na
 }
+@enduml

@@ -1,3 +1,4 @@
+@startuml
 state Player {
    
    state Actions {
@@ -41,3 +42,4 @@ state "Dialogue System" as DialogSystem {
 }
 
 BattleSystem : This is detailed in the Battle System UML Diagram.
+@enduml
