@@ -1,0 +1,151 @@
+@startuml
+
+/'==============
+= Set Defaults =
+=============='/
+
+skinparam defaultFontName Fira Code
+hide empty description
+
+/'========
+= States =
+========'/
+
+Upkeep: Resolve beginning-of-turn effects
+
+ActingEnemies: Each enemy has a list of available actions
+ActingEnemies: Each enemy chooses one action each turn
+ActingEnemies: Each enemy has a collection of state
+
+state "Resolve Acting Enemies" as ActingEnemies {
+
+  [*] -> Enemies
+
+  state "Acting Enemies" as Enemies {
+    state Enemy1
+    state Enemy2
+    state EnemyN
+
+    Enemy1 -> Enemy2
+    Enemy2 -> EnemyN: ...
+  }
+  
+  state "Turn Resolution" as TurnResolution {
+    state PickAction
+    state "Pre-Exec Validation" as PreExecValidate {
+      state "Rule 1: Check Player HP" as PreExecRule1
+      PreExecRule1: If HP > 0
+
+      state "Rule 2: Check Enemy HP" as PreExecRule2
+      PreExecRule2: If enemy HP > 0
+
+      state "Rule N" as PreExecRuleN
+
+      state PreExecJoin <<join>>
+
+
+      [*] --> PreExecRule1
+      PreExecRule1 -> PreExecRule2: Then
+      PreExecRule1 --> PreExecJoin: Else
+      PreExecRule2 -> PreExecRuleN: Then
+      PreExecRule2 --> PreExecJoin: Else
+      PreExecRuleN --> PreExecJoin: Else
+      PreExecJoin --> [*]
+    }
+
+    state "Pre-Exec Triggers" as PreExTriggers {
+      PreExTrigger1 -> PreExTrigger2
+      PreExTrigger2 -> PreExTriggerN: ...
+
+    }
+
+    state "Execute Action" as ExecAction {
+      state Execute
+      state "Evaluate Effects" as ExecActionEffects {
+        state "Effect 1" as EAEffect1
+        state "Effect 2" as EAEffect2
+        state "Effect N" as EAEffectN
+
+        EAEffect1 -> EAEffect2
+        EAEffect2 -> EAEffectN: ...
+      }
+
+      Execute -> ExecActionEffects
+    }
+
+    state "Post-Exec Validation" as PostExecValidate {
+      state "Evaluate Rules" as POVRules {
+        state "Check Player HP" as POVRule1
+        POVRule1: If HP <= 0
+
+        state "Check Enemy HP" as POVRule2
+        POVRule2: If enemy HP > 0
+        state "RuleN" as POVRuleN
+
+
+        POVRule1 -> POVRule2
+        POVRule2 -> POVRuleN: ...
+      }
+    }
+
+    state "Post-Exec Triggers" as PostExecTriggers {
+      PoExTrigger1 -> PoExTrigger2
+      PoExTrigger2 -> PoExTriggerN: ...
+    }
+
+    state PreExVForkState <<fork>>
+    state PoExVForkState <<fork>>
+    state TRJoinState <<join>>
+
+    state "Handle Transitions" as TRHandleTransitions
+    
+    [*] --> PickAction
+    
+    PickAction --> PreExecValidate
+
+    PreExecValidate --> PreExVForkState
+    PreExVForkState --> PreExTriggers
+    PreExVForkState --> TRHandleTransitions
+
+    PreExTriggers --> ExecAction
+    ExecAction --> PostExecValidate
+
+    PostExecValidate --> PoExVForkState
+    PoExVForkState --> PostExecTriggers
+    PoExVForkState --> TRHandleTransitions
+
+    PostExecTriggers --> TRJoinState
+
+    TRHandleTransitions --> TRJoinState
+
+    TRJoinState --> [*]
+  }
+
+  Enemies --> TurnResolution
+  TurnResolution -u-> Enemies
+  Enemies -> [*]
+}
+
+state End {
+  state "End Step Validation" as EndStepValidate {
+    state Rule1
+    state Rule2
+    state RuleN
+
+    Rule1 -> Rule2
+    Rule2 -> RuleN: ...
+  }
+}
+
+End: Resolve end-of-turn effects
+End: Check player health. If == 0, go to game over
+
+/'=============
+= Transitions =
+============='/
+
+[*] -> Upkeep: From previous player turn
+Upkeep -> ActingEnemies
+ActingEnemies -> End
+End -> [*]
+@enduml
