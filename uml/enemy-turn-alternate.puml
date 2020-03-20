@@ -1,4 +1,4 @@
-@startuml
+@startuml Enemy Turn
 /'==============
 = Set Defaults =
 =============='/
@@ -6,9 +6,9 @@
 skinparam defaultFontName Fira Code
 hide empty description
 
-/'========
-= States =
-========'/
+/'=============
+= Root States =
+============='/
 
 Upkeep: Resolve beginning-of-turn effects
 
@@ -20,20 +20,22 @@ ActingEnemies: Each enemy has a collection of state
 
 state "Resolve Acting Enemies" as ActingEnemies {
 
-  [*] -> Enemies
-
   state "Acting Enemies" as Enemies {
+
     state Enemy1
     state Enemy2
     state EnemyN
 
     Enemy1 -> Enemy2
     Enemy2 -> EnemyN: ...
+
   }
   
   state "Turn Resolution" as TurnResolution {
+
     state PickAction
     state "Pre-Exec Validation" as PreExecValidate {
+
       state "Rule 1: Check Player HP" as PreExecRule1
       PreExecRule1: If HP > 0
 
@@ -52,29 +54,36 @@ state "Resolve Acting Enemies" as ActingEnemies {
       PreExecRule2 --> PreExecJoin: Else
       PreExecRuleN --> PreExecJoin
       PreExecJoin --> [*]
+
     }
 
     state "Pre-Exec Triggers" as PreExTriggers {
+
       PreExTrigger1 -> PreExTrigger2
       PreExTrigger2 -> PreExTriggerN: ...
 
     }
 
     state "Execute Action" as ExecAction {
+
       state Execute
       state "Evaluate Effects" as ExecActionEffects {
+
         state "Effect 1" as EAEffect1
         state "Effect 2" as EAEffect2
         state "Effect N" as EAEffectN
 
         EAEffect1 -> EAEffect2
         EAEffect2 -> EAEffectN: ...
+
       }
 
       Execute -> ExecActionEffects
+
     }
 
     state "Post-Exec Validation" as PostExecValidate {
+
       state "Check Player HP" as POVRule1
       POVRule1: If HP <= 0
 
@@ -95,8 +104,10 @@ state "Resolve Acting Enemies" as ActingEnemies {
     }
 
     state "Post-Exec Triggers" as PostExecTriggers {
+
       PoExTrigger1 -> PoExTrigger2
       PoExTrigger2 -> PoExTriggerN: ...
+
     }
 
     state PreExVForkState <<choice>>
@@ -125,11 +136,14 @@ state "Resolve Acting Enemies" as ActingEnemies {
     TRHandleTransitions --> TRJoinState
 
     TRJoinState --> [*]
+
   }
 
+  [*] -> Enemies
   Enemies --> TurnResolution
   TurnResolution -u-> Enemies
   Enemies -> [*]
+
 }
 
 state EndTurn {
@@ -153,9 +167,9 @@ state PreEndBattleJoin <<choice>>
 
 EndBattle: Resolves the end of the battle and exits the battle system. 
 
-/'=============
-= Transitions =
-============='/
+/'==================
+= Root Transitions =
+=================='/
 
 [*] -> Upkeep: From previous player turn
 Upkeep -> PostUpkeepFork
