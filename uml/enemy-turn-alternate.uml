@@ -1,5 +1,4 @@
 @startuml
-
 /'==============
 = Set Defaults =
 =============='/
@@ -12,6 +11,8 @@ hide empty description
 ========'/
 
 Upkeep: Resolve beginning-of-turn effects
+
+state PostUpkeepFork <<choice>>
 
 ActingEnemies: Each enemy has a list of available actions
 ActingEnemies: Each enemy chooses one action each turn
@@ -41,15 +42,15 @@ state "Resolve Acting Enemies" as ActingEnemies {
 
       state "Rule N" as PreExecRuleN
 
-      state PreExecJoin <<join>>
+      state PreExecJoin <<choice>>
 
 
       [*] --> PreExecRule1
       PreExecRule1 -> PreExecRule2: Then
       PreExecRule1 --> PreExecJoin: Else
-      PreExecRule2 -> PreExecRuleN: Then
+      PreExecRule2 -> PreExecRuleN: ...
       PreExecRule2 --> PreExecJoin: Else
-      PreExecRuleN --> PreExecJoin: Else
+      PreExecRuleN --> PreExecJoin
       PreExecJoin --> [*]
     }
 
@@ -74,18 +75,23 @@ state "Resolve Acting Enemies" as ActingEnemies {
     }
 
     state "Post-Exec Validation" as PostExecValidate {
-      state "Evaluate Rules" as POVRules {
-        state "Check Player HP" as POVRule1
-        POVRule1: If HP <= 0
+      state "Check Player HP" as POVRule1
+      POVRule1: If HP <= 0
 
-        state "Check Enemy HP" as POVRule2
-        POVRule2: If enemy HP > 0
-        state "RuleN" as POVRuleN
+      state "Check Enemy HP" as POVRule2
+      POVRule2: If enemy HP > 0
+      state "RuleN" as POVRuleN
 
+      state PostExecJoin <<choice>>
 
-        POVRule1 -> POVRule2
-        POVRule2 -> POVRuleN: ...
-      }
+      [*] --> POVRule1
+      POVRule1 -> POVRule2: Then
+      POVRule1 --> PostExecJoin: Else
+      POVRule2 -> POVRuleN: ...
+      POVRule2 --> PostExecJoin: Else
+      POVRuleN --> PostExecJoin
+      PostExecJoin --> [*]
+      
     }
 
     state "Post-Exec Triggers" as PostExecTriggers {
@@ -93,9 +99,9 @@ state "Resolve Acting Enemies" as ActingEnemies {
       PoExTrigger2 -> PoExTriggerN: ...
     }
 
-    state PreExVForkState <<fork>>
-    state PoExVForkState <<fork>>
-    state TRJoinState <<join>>
+    state PreExVForkState <<choice>>
+    state PoExVForkState <<choice>>
+    state TRJoinState <<choice>>
 
     state "Handle Transitions" as TRHandleTransitions
     
@@ -126,7 +132,7 @@ state "Resolve Acting Enemies" as ActingEnemies {
   Enemies -> [*]
 }
 
-state End {
+state EndTurn {
   state "End Step Validation" as EndStepValidate {
     state Rule1
     state Rule2
@@ -137,15 +143,29 @@ state End {
   }
 }
 
-End: Resolve end-of-turn effects
-End: Check player health. If == 0, go to game over
+state PostTRFork <<choice>>
+
+EndTurn: Resolve end-of-turn effects
+EndTurn: Check player health. If == 0, transition to EndBattle
+
+state PostEndTurnFork <<choice>>
+state PreEndBattleJoin <<choice>>
+
+EndBattle: Resolves the end of the battle and exits the battle system. 
 
 /'=============
 = Transitions =
 ============='/
 
 [*] -> Upkeep: From previous player turn
-Upkeep -> ActingEnemies
-ActingEnemies -> End
-End -> [*]
+Upkeep -> PostUpkeepFork
+PostUpkeepFork -> ActingEnemies
+PostUpkeepFork --> PreEndBattleJoin
+ActingEnemies -> PostTRFork
+PostTRFork -> EndTurn
+PostTRFork --> PreEndBattleJoin
+EndTurn -> PostEndTurnFork
+PostEndTurnFork --> PreEndBattleJoin
+PreEndBattleJoin --> EndBattle
+PostEndTurnFork -> [*]: To next player turn
 @enduml
