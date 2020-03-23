@@ -1,8 +1,28 @@
-Consumables : Single use
+@startuml Inventory
+/'==============
+= Set Defaults =
+=============='/
+skinparam defaultFontName Fira Code
+hide empty description
+
+/'========
+= States =
+========'/
+
+ConsumablesMenu : Single use
+ItemsMenu : Permanent
+state ConsumablesMenu
+
+
+/'=============
+= Transitions =
+============='/
 
 [*] -> InvMenu : Enter inventory
-InvMenu --> Consumables
-Consumables --> InvMenu
-InvMenu --> PermanentItems
-PermanentItems --> InvMenu
+InvMenu --> ConsumablesMenu
+ConsumablesMenu --> InvMenu
+InvMenu --> ItemsMenu
+ItemsMenu --> InvMenu
 InvMenu -> [*] : Exit inventory
+
+@enduml
