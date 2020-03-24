@@ -1,0 +1,50 @@
+@startuml Entities
+
+/'==================
+= Work in Progress =
+=================='/
+
+/'=========
+= Classes =
+========='/
+
+class Entity {
+    An entity in the battle system
+    --
+    int MaxHP
+    int CurrentHP
+    bool isAlive
+    collection Actions
+    changeHP(int): Sets isAlive = CurrentHP > 0
+}
+
+class Player {
+    collection Choices
+    collection Items
+    addChoice(Choice)
+    changeActions()
+}
+
+class Enemy {
+    string Name
+    string Type: Determines avail. actions
+    setActions(Type)
+}
+
+
+
+class Item {
+
+}
+
+
+
+
+/'=============
+= Connections =
+============='/
+
+Entity <|-- Player
+Entity <|-- Enemy
+
+@enduml
