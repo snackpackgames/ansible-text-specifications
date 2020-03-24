@@ -1,0 +1,185 @@
+@startuml Enemy Turn
+/'==============
+= Set Defaults =
+=============='/
+
+skinparam defaultFontName Fira Code
+hide empty description
+
+/'=============
+= Root States =
+============='/
+
+Upkeep: Resolve beginning-of-turn effects
+
+state PostUpkeepFork <<choice>>
+
+ActingEnemies: Each enemy has a list of available actions
+ActingEnemies: Each enemy chooses one action each turn
+ActingEnemies: Each enemy has a collection of state
+
+state "Resolve Acting Enemies" as ActingEnemies {
+
+  state "Acting Enemies" as Enemies {
+
+    state Enemy1
+    state Enemy2
+    state EnemyN
+
+    Enemy1 -> Enemy2
+    Enemy2 -> EnemyN: ...
+
+  }
+  
+  state "Turn Resolution" as TurnResolution {
+
+    state PickAction
+    state "Pre-Exec Validation" as PreExecValidate {
+
+      state "Rule 1: Check Player HP" as PreExecRule1
+      PreExecRule1: If HP > 0
+
+      state "Rule 2: Check Enemy HP" as PreExecRule2
+      PreExecRule2: If enemy HP > 0
+
+      state "Rule N" as PreExecRuleN
+
+      state PreExecJoin <<choice>>
+
+
+      [*] --> PreExecRule1
+      PreExecRule1 -> PreExecRule2: Then
+      PreExecRule1 --> PreExecJoin: Else
+      PreExecRule2 -> PreExecRuleN: ...
+      PreExecRule2 --> PreExecJoin: Else
+      PreExecRuleN --> PreExecJoin
+      PreExecJoin --> [*]
+
+    }
+
+    state "Pre-Exec Triggers" as PreExTriggers {
+
+      PreExTrigger1 -> PreExTrigger2
+      PreExTrigger2 -> PreExTriggerN: ...
+
+    }
+
+    state "Execute Action" as ExecAction {
+
+      state Execute
+      state "Evaluate Effects" as ExecActionEffects {
+
+        state "Effect 1" as EAEffect1
+        state "Effect 2" as EAEffect2
+        state "Effect N" as EAEffectN
+
+        EAEffect1 -> EAEffect2
+        EAEffect2 -> EAEffectN: ...
+
+      }
+
+      Execute -> ExecActionEffects
+
+    }
+
+    state "Post-Exec Validation" as PostExecValidate {
+
+      state "Check Player HP" as POVRule1
+      POVRule1: If HP <= 0
+
+      state "Check Enemy HP" as POVRule2
+      POVRule2: If enemy HP > 0
+      state "RuleN" as POVRuleN
+
+      state PostExecJoin <<choice>>
+
+      [*] --> POVRule1
+      POVRule1 -> POVRule2: Then
+      POVRule1 --> PostExecJoin: Else
+      POVRule2 -> POVRuleN: ...
+      POVRule2 --> PostExecJoin: Else
+      POVRuleN --> PostExecJoin
+      PostExecJoin --> [*]
+      
+    }
+
+    state "Post-Exec Triggers" as PostExecTriggers {
+
+      PoExTrigger1 -> PoExTrigger2
+      PoExTrigger2 -> PoExTriggerN: ...
+
+    }
+
+    state PreExVForkState <<choice>>
+    state PoExVForkState <<choice>>
+    state TRJoinState <<choice>>
+
+    state "Handle Transitions" as TRHandleTransitions
+    
+    [*] --> PickAction
+    
+    PickAction --> PreExecValidate
+
+    PreExecValidate --> PreExVForkState
+    PreExVForkState --> PreExTriggers
+    PreExVForkState --> TRHandleTransitions
+
+    PreExTriggers --> ExecAction
+    ExecAction --> PostExecValidate
+
+    PostExecValidate --> PoExVForkState
+    PoExVForkState --> PostExecTriggers
+    PoExVForkState --> TRHandleTransitions
+
+    PostExecTriggers --> TRJoinState
+
+    TRHandleTransitions --> TRJoinState
+
+    TRJoinState --> [*]
+
+  }
+
+  [*] -> Enemies
+  Enemies --> TurnResolution
+  TurnResolution -u-> Enemies
+  Enemies -> [*]
+
+}
+
+state EndTurn {
+  state "End Step Validation" as EndStepValidate {
+    state Rule1
+    state Rule2
+    state RuleN
+
+    Rule1 -> Rule2
+    Rule2 -> RuleN: ...
+  }
+}
+
+state PostTRFork <<choice>>
+
+EndTurn: Resolve end-of-turn effects
+EndTurn: Check player health. If == 0, transition to EndBattle
+
+state PostEndTurnFork <<choice>>
+state PreEndBattleJoin <<choice>>
+
+EndBattle: Resolves the end of the battle and exits the battle system. 
+
+/'==================
+= Root Transitions =
+=================='/
+
+[*] -> Upkeep: From previous player turn
+Upkeep -> PostUpkeepFork
+PostUpkeepFork -> ActingEnemies
+PostUpkeepFork --> PreEndBattleJoin
+ActingEnemies -> PostTRFork
+PostTRFork -> EndTurn
+PostTRFork --> PreEndBattleJoin
+EndTurn -> PostEndTurnFork
+PostEndTurnFork --> PreEndBattleJoin
+PreEndBattleJoin --> EndBattle
+PostEndTurnFork -> [*]: To next player turn
+@enduml

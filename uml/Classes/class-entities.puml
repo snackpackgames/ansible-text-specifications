@@ -34,7 +34,9 @@ class Enemy {
 
 
 class Item {
-
+    string Name
+    bool isConsumable
+    use()
 }
 
 
@@ -46,5 +48,6 @@ class Item {
 
 Entity <|-- Player
 Entity <|-- Enemy
+Player *-- Item
 
 @enduml

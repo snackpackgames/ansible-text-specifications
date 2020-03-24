@@ -1,3 +1,4 @@
+@startuml PlayerTurn
 Upkeep: Resolve beginning-of-turn effects
 End: Resolve end-of-turn effects
 End: Check enemy health. If all == 0, end battle
@@ -11,3 +12,4 @@ state Action {
  Validation --> Execution
  Execution --> End
 }
+@enduml

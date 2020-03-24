@@ -1,3 +1,4 @@
+@startuml BattleSystem
 [*] -> BattleStart
 BattleStart --> PlayerTurn
 PlayerTurn -> EnemyTurn
@@ -5,3 +6,4 @@ EnemyTurn -> PlayerTurn
 EnemyTurn --> BattleEnd
 PlayerTurn --> BattleEnd
 BattleEnd -> [*]
+@enduml
